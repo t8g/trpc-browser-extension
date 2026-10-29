@@ -8,6 +8,7 @@ Elle capture les requêtes tRPC de la page et affiche proprement chaque appel :
 - décodage **superjson** (`Date`, `Map`, `Set`, `BigInt`, `undefined`, `RegExp`, `URL`, `NaN`…) ;
 - erreurs tRPC mises en avant (code, statut HTTP, message) ;
 - arbre JSON repliable, filtre par procédure, filtre « erreurs uniquement », copie en JSON ;
+- recherche dans le détail d'un appel (clés et valeurs, onglets Résultat, Input et Brut) : correspondances surlignées, branches dépliées, Entrée / Maj+Entrée pour passer de l'une à l'autre ;
 - thème clair / sombre selon les DevTools.
 
 Aucune dépendance, aucun build : le dossier se charge tel quel.

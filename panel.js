@@ -1,5 +1,5 @@
 import { parseExchange } from './src/trpc.js';
-import { renderTree, toPrettyJson } from './src/tree.js';
+import { highlightText, renderTree, toPrettyJson } from './src/tree.js';
 
 const devtools = globalThis.chrome?.devtools;
 
@@ -9,6 +9,8 @@ const state = {
   tab: 'output',
   filter: '',
   errorsOnly: false,
+  search: '', // search inside the selected call's detail
+  matchIndex: 0,
 };
 let nextId = 1;
 
@@ -23,6 +25,8 @@ const ui = {
   path: $('d-path'),
   meta: $('d-meta'),
   content: $('tab-content'),
+  search: $('search'),
+  searchCount: $('search-count'),
 };
 
 applyTheme();
@@ -39,10 +43,41 @@ $('errors-only').addEventListener('change', (e) => {
 document.querySelectorAll('.tabs button').forEach((button) =>
   button.addEventListener('click', () => {
     state.tab = button.dataset.tab;
+    state.matchIndex = 0;
     renderDetail();
   }),
 );
 $('copy').addEventListener('click', copyCurrentTab);
+
+let searchTimer;
+ui.search.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    state.search = ui.search.value;
+    state.matchIndex = 0;
+    renderDetail();
+  }, 120);
+});
+ui.search.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    moveMatch(e.shiftKey ? -1 : 1);
+  } else if (e.key === 'Escape' && ui.search.value) {
+    e.stopPropagation(); // keep the DevTools drawer from toggling
+    ui.search.value = '';
+    state.search = '';
+    renderDetail();
+  }
+});
+$('search-prev').addEventListener('click', () => moveMatch(-1));
+$('search-next').addEventListener('click', () => moveMatch(1));
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && selectedCall()) {
+    e.preventDefault();
+    ui.search.focus();
+    ui.search.select();
+  }
+});
 
 if (devtools) {
   devtools.network.onRequestFinished.addListener(onRequestFinished);
@@ -131,6 +166,7 @@ function renderList() {
       );
       li.addEventListener('click', () => {
         state.selectedId = call.id;
+        state.matchIndex = 0;
         renderList();
         renderDetail();
       });
@@ -175,19 +211,47 @@ function renderDetail() {
 
   document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === state.tab));
 
+  const query = state.search;
   const nodes = [];
   if (state.tab === 'output') {
-    if (call.error) nodes.push(errorBox(call.error), renderTree(call.error.raw));
-    else nodes.push(renderTree(call.output));
+    if (call.error) nodes.push(errorBox(call.error), renderTree(call.error.raw, { query }));
+    else nodes.push(renderTree(call.output, { query }));
   } else if (state.tab === 'input') {
-    nodes.push(renderTree(call.input));
+    nodes.push(renderTree(call.input, { query }));
   } else {
-    const pre = document.createElement('pre');
-    pre.className = 'raw';
-    pre.textContent = toPrettyJson({ url: call.url, rawInput: call.rawInput, rawOutput: call.rawOutput });
-    nodes.push(pre);
+    const raw = toPrettyJson({ url: call.url, rawInput: call.rawInput, rawOutput: call.rawOutput });
+    nodes.push(highlightText('pre', 'raw', raw, query));
   }
   ui.content.replaceChildren(...nodes);
+  showMatch();
+}
+
+function matches() {
+  return [...ui.content.querySelectorAll('mark.tree-match')];
+}
+
+function moveMatch(step) {
+  const count = matches().length;
+  if (!count) return;
+  state.matchIndex = (state.matchIndex + step + count) % count;
+  showMatch();
+}
+
+// Marks the current match, scrolls to it and updates the "n/total" counter.
+function showMatch() {
+  const marks = matches();
+  if (!state.search.trim()) {
+    ui.searchCount.textContent = '';
+    return;
+  }
+  if (!marks.length) {
+    ui.searchCount.textContent = 'aucun résultat';
+    return;
+  }
+  state.matchIndex = Math.min(state.matchIndex, marks.length - 1);
+  marks.forEach((m, i) => m.classList.toggle('current', i === state.matchIndex));
+  marks[state.matchIndex].scrollIntoView({ block: 'nearest' });
+  ui.searchCount.textContent = `${state.matchIndex + 1}/${marks.length}`;
 }
 
 function errorBox(error) {
