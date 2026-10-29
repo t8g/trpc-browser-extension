@@ -15,6 +15,8 @@
   --null: #8a8f98;
   --key: #7c2d12;
   --type-bg: #eef1f5;
+  --match: #fde68a;
+  --match-current: #fb923c;
   color-scheme: light;
 }
 
@@ -35,6 +37,8 @@
   --null: #8a8f98;
   --key: #f0b48a;
   --type-bg: #33363c;
+  --match: #6b5a1e;
+  --match-current: #b45309;
   color-scheme: dark;
 }
 
@@ -212,8 +216,29 @@ input[type='search'] {
 
 .tab-actions {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   padding: 6px 8px 0;
+}
+
+.tab-actions .spacer {
+  flex: 1;
+}
+
+#search-count {
+  min-width: 48px;
+}
+
+mark.tree-match {
+  background: var(--match);
+  color: inherit;
+  border-radius: 2px;
+}
+
+mark.tree-match.current {
+  background: var(--match-current);
+  outline: 1px solid var(--accent);
 }
 
 .tab-content {

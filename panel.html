@@ -36,6 +36,11 @@
             <button data-tab="raw" role="tab">Brut</button>
           </nav>
           <div class="tab-actions">
+            <input id="search" type="search" placeholder="Rechercher (clé ou valeur)…" aria-label="Rechercher dans le détail" />
+            <span id="search-count" class="muted"></span>
+            <button id="search-prev" title="Précédent (Maj+Entrée)" aria-label="Résultat précédent">↑</button>
+            <button id="search-next" title="Suivant (Entrée)" aria-label="Résultat suivant">↓</button>
+            <span class="spacer"></span>
             <button id="copy">Copier en JSON</button>
           </div>
           <div id="tab-content" class="tab-content"></div>
