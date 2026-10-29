@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>tRPC DevTools</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header class="toolbar">
+      <button id="clear" title="Vider la liste">⊘ Vider</button>
+      <label class="check"><input type="checkbox" id="preserve" /> Conserver à la navigation</label>
+      <input id="filter" type="search" placeholder="Filtrer par procédure…" />
+      <label class="check"><input type="checkbox" id="errors-only" /> Erreurs uniquement</label>
+      <span id="count" class="muted"></span>
+    </header>
+    <main class="layout">
+      <section class="list" aria-label="Appels tRPC">
+        <ul id="calls"></ul>
+        <p id="empty" class="placeholder">
+          En attente de requêtes tRPC…<br />
+          <span class="muted">Recharge la page avec DevTools ouvert pour capturer les appels.</span>
+        </p>
+      </section>
+      <section class="detail" aria-label="Détail">
+        <div id="detail-empty" class="placeholder">Sélectionne un appel pour voir son détail.</div>
+        <div id="detail" hidden>
+          <div class="detail-head">
+            <span id="d-type" class="badge"></span>
+            <strong id="d-path"></strong>
+            <span id="d-meta" class="muted"></span>
+          </div>
+          <nav class="tabs" role="tablist">
+            <button data-tab="output" role="tab">Résultat</button>
+            <button data-tab="input" role="tab">Input</button>
+            <button data-tab="raw" role="tab">Brut</button>
+          </nav>
+          <div class="tab-actions">
+            <button id="copy">Copier en JSON</button>
+          </div>
+          <div id="tab-content" class="tab-content"></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="panel.js"></script>
+  </body>
+</html>
