@@ -1,0 +1,13 @@
+{
+  "name": "trpc-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DevTools panel that captures tRPC requests and shows their results cleanly",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "icons": "python3 scripts/make-icons.py",
+    "package": "node scripts/package.mjs"
+  },
+  "license": "Unlicense"
+}
